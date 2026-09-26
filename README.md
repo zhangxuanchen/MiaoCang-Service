@@ -2,6 +2,31 @@
 
 个人知识管理书房：收集 → 引力波分类 → 知识图谱 → 喵（Agent）会话 → 阅读整理 → 喵的日记观测。Spring Boot 3.5.5 + H2 + Lucene 中文检索 + AgentScope，前端原生 JS（无构建链，vendor 本地化）。
 
+## 界面预览
+
+<table>
+<tr>
+<td width="50%"><a href="docs/screenshots/01-landing.png"><img src="docs/screenshots/01-landing.png" alt="品牌落地页"></a><br><sub><b>品牌落地页</b> — 把每一条投入，都归入它的书</sub></td>
+<td width="50%"><a href="docs/screenshots/02-overview.png"><img src="docs/screenshots/02-overview.png" alt="书库总览"></a><br><sub><b>书库总览</b> — 喂养内容 / 正在成长的书籍 / 已归的内容 / 待你解决</sub></td>
+</tr>
+<tr>
+<td><a href="docs/screenshots/03-organize-docs.png"><img src="docs/screenshots/03-organize-docs.png" alt="喵的整理"></a><br><sub><b>喵的整理</b> — 左：书库文件树；中：文档预览；右：喵会话 + 记忆状态</sub></td>
+<td><a href="docs/screenshots/04-organize-book.png"><img src="docs/screenshots/04-organize-book.png" alt="整理成书"></a><br><sub><b>整理成书</b> — 自动整理成卡片 → 卡片整理成书籍，阶段进度与实时事件流可见</sub></td>
+</tr>
+<tr>
+<td><a href="docs/screenshots/05-mindmap.png"><img src="docs/screenshots/05-mindmap.png" alt="mermaid 思维导图"></a><br><sub><b>专属工作区</b> — mermaid 全类型渲染，图为 mindmap 思维导图</sub></td>
+<td><a href="docs/screenshots/06-sequence.png"><img src="docs/screenshots/06-sequence.png" alt="mermaid 时序图"></a><br><sub><b>专属工作区</b> — 同上，图为 sequenceDiagram 时序图</sub></td>
+</tr>
+<tr>
+<td><a href="docs/screenshots/07-mixed-content.png"><img src="docs/screenshots/07-mixed-content.png" alt="图文混合排版"></a><br><sub><b>图文混排</b> — 图表 + 表格 + 引用 + 列表，正文相对路径图片就地解析</sub></td>
+<td><a href="docs/screenshots/08-test-doc.png"><img src="docs/screenshots/08-test-doc.png" alt="测试文档"></a><br><sub><b>测试文档</b> — 喵自己写文档验证渲染能力（5 类段落形态 / 8 种 mermaid）</sub></td>
+</tr>
+<tr>
+<td><a href="docs/screenshots/09-test-checklist.png"><img src="docs/screenshots/09-test-checklist.png" alt="渲染测试清单"></a><br><sub><b>渲染测试清单</b> — 24 项测试逐条核对，结果标回文档</sub></td>
+<td><a href="docs/screenshots/10-tokens.png"><img src="docs/screenshots/10-tokens.png" alt="喵喵记录"></a><br><sub><b>喵喵记录</b> — 事件数 / Token 消耗与逐轮明细，回看喵做了什么</sub></td>
+</tr>
+</table>
+
 ## 快速开始
 
 ```bash
