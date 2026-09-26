@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 喵藏书房 LaunchAgent：登录自启 + 崩溃自动拉起。__ROOT__ 由 bin/mc.sh install 替换为项目根 -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.miaocang.service</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>__ROOT__/bin/mc.sh</string>
+    <string>run-foreground</string>
+  </array>
+  <key>WorkingDirectory</key><string>__ROOT__</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>10</integer>
+  <key>StandardOutPath</key><string>__ROOT__/data/logs/launchd.out.log</string>
+  <key>StandardErrPath</key><string>__ROOT__/data/logs/launchd.err.log</string>
+</dict>
+</plist>

@@ -1,0 +1,8 @@
+# 侧车运行时依赖（纯 CPU 场景）。
+# torch 单独装，因为要走 CPU-only 索引（CUDA 版 wheels 是 GB 级）：
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch
+# 见 bin/laya-setup.sh。
+transformers>=4.48.0
+safetensors>=0.4.0
+huggingface_hub>=0.20.0
+numpy>=1.20.0

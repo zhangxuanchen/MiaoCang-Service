@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>喵藏 · 内容引力波整理系统</title>
+  <!-- 静态资源不带 ?v= 参数：服务端对所有静态资源下发 no-cache+must-revalidate（见 application.yml），
+       浏览器每次都回源校验，改完普通刷新即生效，不需要手工 bump 版本号 -->
+  <link rel="stylesheet" href="style.css?v=20260924-085329">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" onclick="goHome()">
+      <div class="ico brand-icon"><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span><span class="mouth"></span></div>
+      <div class="brand-text">
+      <strong>喵藏</strong>
+      <small>内容引力波 · 个人 Wiki</small>
+    </div>
+    <div class="topbar-actions">
+      <a class="btn ghost" href="/">🏛 总览</a>
+      <span class="user-box" id="userBox"></span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="shelf">
+      <div class="sidebar-head">
+        <button class="sidebar-title sidebar-home-btn" title="进入书房总览" onclick="goHome()">书房 · SHELF</button>
+      </div>
+      <div id="shelfTree"><div class="empty">加载中…</div></div>
+    </aside>
+    <main class="main" id="main">
+      <div class="empty">加载中…</div>
+    </main>
+  </div>
+
+  <!-- 知识图谱 · 书维护抽屉 -->
+  <div class="drawer-mask" id="drawerMask" style="display:none" onclick="closeDrawer()"></div>
+  <aside class="drawer" id="drawer">
+    <div class="drawer-top">
+      <span class="drawer-badge">🕸 图谱 · 内容维护</span>
+      <button class="close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <!-- 采集弹窗 -->
+  <div class="modal-mask" id="collectModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3>采集内容</h3><button class="close" onclick="closeModal('collectModal')">×</button></div>
+      <div class="tabs">
+        <button class="tab active" data-tab="url" onclick="switchCollectTab('url')">🔗 网页链接</button>
+        <button class="tab" data-tab="text" onclick="switchCollectTab('text')">📝 文本</button>
+        <button class="tab" data-tab="file" onclick="switchCollectTab('file')">📄 Word / Excel</button>
+      </div>
+      <div class="tab-pane" id="pane-url">
+        <input id="collectUrl" type="url" placeholder="粘贴网页链接，如 https://example.com/article">
+      </div>
+      <div class="tab-pane" id="pane-text" style="display:none">
+        <input id="collectTextTitle" type="text" placeholder="标题（可选，默认取第一行）">
+        <textarea id="collectTextBody" rows="6" placeholder="粘贴文本内容…"></textarea>
+      </div>
+      <div class="tab-pane" id="pane-file" style="display:none">
+        <div class="dropzone" onclick="document.getElementById('collectFile').click()">
+          <div>📄 点击选择 Word(.docx/.doc) 或 Excel(.xlsx/.xls) 文件</div>
+          <small>将自动抽取文字内容并识别归属</small>
+        </div>
+        <input id="collectFile" type="file" accept=".doc,.docx,.xls,.xlsx" style="display:none" onchange="collectFileNow(this)">
+      </div>
+      <div class="modal-foot">
+        <span class="hint" id="collectHint"></span>
+        <button class="btn primary" id="collectSubmitBtn" onclick="submitCollect()">投递并引力归档</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 内容详情 -->
+  <div class="modal-mask" id="detailModal" style="display:none">
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3 id="detailTitle"></h3>
+        <button class="close" onclick="closeModal('detailModal')">×</button>
+      </div>
+      <div class="modal-body" id="detailBody"></div>
+      <div class="modal-foot">
+        <div class="row-actions" id="detailActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动内容 -->
+  <div class="modal-mask" id="moveModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3>移动内容</h3><button class="close" onclick="closeModal('moveModal')">×</button></div>
+      <div class="modal-body">
+        <p class="hint-block" id="moveTitle"></p>
+        <label>目标书</label>
+        <select id="moveBook"></select>
+        <label>目标目录</label>
+        <select id="moveCatalog"></select>
+        <label style="margin-top:10px"><input type="checkbox" id="moveToInbox"> 移回收集箱（取消归档）</label>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('moveModal')">取消</button>
+        <button class="btn primary" onclick="submitMove()">确定移动</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 知识分类编辑（挂在某只猫下） -->
+  <div class="modal-mask" id="typeModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3 id="typeModalTitle">新建知识分类</h3><button class="close" onclick="closeModal('typeModal')">×</button></div>
+      <div class="modal-body">
+        <div id="tmOwnRows">
+          <label>分类名 *</label>
+          <input id="typeName" type="text" placeholder="如：人工智能、职场管理">
+          <div id="tmAttachRow" style="display:none">
+            <label>🌐 挂接共享分类（选了就不再新建，全体喵共用）</label>
+            <select id="typePreset" onchange="onAttachPick()"></select>
+            <div class="tm-hint">挂接后该分类常驻当前喵的知识图谱；书与内容由全体喵共享，谁归档算谁的。</div>
+          </div>
+          <div id="tmBuildRows">
+            <div class="grid2">
+              <div><label>图标</label><input id="typeIcon" type="text" placeholder="💡"></div>
+              <div><label>主题色</label><input id="typeColor" type="color" value="#3B82F6"></div>
+            </div>
+            <label>描述</label>
+            <input id="typeDesc" type="text" placeholder="一句话描述该类型收录什么">
+            <label>引力关键词（逗号分隔，命中越多引力越强）</label>
+            <textarea id="typeKeywords" rows="3" placeholder="投资, 股票, 估值, 财报…"></textarea>
+          <details class="tm-shared-ref">
+            <summary>📖 共享分类引力词参考（点击词条直接复用，不必去别处找）</summary>
+            <div id="tmSharedList"></div>
+          </details>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('typeModal')">取消</button>
+        <button class="btn primary" id="tmSubmitBtn" onclick="submitType()">保存分类</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 导出 Markdown（多选排队打包） -->
+  <div class="modal-mask" id="exportModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3 id="exportModalTitle">⬇ 导出 Markdown</h3><button class="close" onclick="closeModal('exportModal')">×</button></div>
+      <div class="modal-body">
+        <p class="export-summary" id="exportSummary"></p>
+        <div id="exportGroups"></div>
+      </div>
+      <div class="modal-foot">
+        <span class="hint" id="exportHint"></span>
+        <button class="btn" onclick="closeModal('exportModal')">取消</button>
+        <button class="btn primary" id="exportSubmitBtn" onclick="runExportQueue()">开始导出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 领养 / 编辑猫 -->
+  <div class="modal-mask" id="catModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3 id="catModalTitle">领养新猫</h3><button class="close" onclick="closeModal('catModal')">×</button></div>
+      <div class="modal-body">
+        <label>猫名 *</label>
+        <input id="catName" type="text" placeholder="如：小肥、喵喵">
+        <div class="grid2">
+          <div><label>图标</label><input id="catIcon" type="text" placeholder="🐱"></div>
+          <div><label>毛色</label><input id="catColor" type="color" value="#F59E0B"></div>
+        </div>
+        <label>简介</label>
+        <input id="catDesc" type="text" placeholder="这只猫照看哪些领域？">
+      </div>
+      <div class="modal-foot">
+        <button class="btn danger" id="catDeleteBtn" style="display:none" onclick="deleteCat(state.editingCat)">送养这只猫</button>
+        <button class="btn" onclick="closeModal('catModal')">取消</button>
+        <button class="btn primary" onclick="submitCat()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建书 -->
+  <div class="modal-mask" id="bookModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3>新建书</h3><button class="close" onclick="closeModal('bookModal')">×</button></div>
+      <div class="modal-body">
+        <label>所属类型</label>
+        <select id="bookType"></select>
+        <label>书名 *</label>
+        <input id="bookTitle" type="text" placeholder="如：《2026 AI 落地笔记》">
+        <label>描述</label>
+        <input id="bookDesc" type="text" placeholder="这本书收录什么（可选）">
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('bookModal')">取消</button>
+        <button class="btn primary" onclick="submitBook()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新建目录 -->
+  <div class="modal-mask" id="catalogModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3 id="catalogModalTitle">新建目录</h3><button class="close" onclick="closeModal('catalogModal')">×</button></div>
+      <div class="modal-body">
+        <p class="hint-block" id="catalogParentHint"></p>
+        <label>目录名 *</label>
+        <input id="catalogName" type="text" placeholder="如：数据库与存储">
+      </div>
+      <div class="modal-foot">
+        <button class="btn" onclick="closeModal('catalogModal')">取消</button>
+        <button class="btn primary" onclick="submitCatalog()">创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 喵的整理 · 书的 md 原文 -->
+  <div class="modal-mask" id="readingMdModal" style="display:none">
+    <div class="modal wide">
+      <div class="modal-head"><h3>📖 大纲原文 <span class="modal-cat" id="readingMdTitle"></span></h3><button class="close" onclick="closeModal('readingMdModal')">×</button></div>
+      <div class="modal-body"><div class="md-pre md-doc md-body" id="readingMdPre"></div></div>
+    </div>
+  </div>
+
+  <!-- 喵的整理 · 知识点详情 -->
+  <div class="modal-mask" id="pointDetailModal" style="display:none">
+    <div class="modal wide">
+      <div class="modal-head"><h3>🔎 知识点 <span class="modal-cat" id="pdBadge"></span></h3><button class="close" onclick="closeModal('pointDetailModal')">×</button></div>
+      <div class="modal-body" id="pdBody"></div>
+    </div>
+  </div>
+
+  <!-- 我的专题：主题新建/编辑 + 收录选择 -->
+  <div class="modal-mask" id="studyModal" style="display:none" onclick="if(event.target===this)closeModal('studyModal')">
+    <div class="modal">
+      <div class="modal-head"><h3 id="studyModalTitle">学习主题</h3><button class="close" onclick="closeModal('studyModal')">×</button></div>
+      <div class="modal-body" id="studyModalBody"></div>
+    </div>
+  </div>
+
+  <!-- origin 文件预览：知识图谱文件节点单击/右键打开 -->
+  <div class="modal-mask" id="fsPrevModal" style="display:none" onclick="if(event.target===this)closeModal('fsPrevModal')">
+    <div class="modal wide">
+      <div class="modal-head"><div class="fs-nav-row"><button class="ws-nav" type="button" id="fsNavBack" onclick="fsNavStep(-1)" title="后退">←</button><button class="ws-nav" type="button" id="fsNavFwd" onclick="fsNavStep(1)" title="前进">→</button><h3 id="fsPrevTitle">文件预览</h3></div><div class="fs-head-right"><span class="fs-head-actions" id="fsHeadActions"></span><button class="close" onclick="closeModal('fsPrevModal')">×</button></div></div>
+      <div class="modal-body" id="fsPrevBody"></div>
+    </div>
+  </div>
+
+  <!-- 喵喵设置 -->
+  <div class="modal-mask" id="agentModal" style="display:none">
+    <div class="modal">
+      <div class="modal-head"><h3>🐱 喵喵设置 <span class="modal-cat" id="agentCatName"></span></h3><button class="close" onclick="closeModal('agentModal')">×</button></div>
+      <div class="modal-body">
+        <p class="hint-block">喵喵的"大脑"。默认<b>模拟输出</b>（本地拼装，零依赖）；配好 API Key 后即接入真实模型写作。任何 OpenAI 兼容端点都可用（DeepSeek / 智谱 / Kimi / 通义 / 火山引擎 / OpenAI，或 agentscope-harness 起的服务）。</p>
+        <label>模式</label>
+        <select id="agentProvider" onchange="onProviderChange()">
+          <option value="mock">🧶 模拟输出（无模型）</option>
+          <option value="deepseek">🌊 DeepSeek</option>
+          <option value="zhipu">💡 智谱 GLM</option>
+          <option value="moonshot">🌙 Kimi（月之暗面）</option>
+          <option value="dashscope">🌫 通义千问（兼容模式）</option>
+          <option value="volces">🌋 火山引擎（字节）</option>
+          <option value="openai">🌍 OpenAI</option>
+          <option value="openai-compat">🔧 自定义 OpenAI 兼容端点</option>
+        </select>
+        <label>Base URL</label>
+        <input id="agentBaseUrl" type="text" placeholder="https://api.deepseek.com/v1">
+        <label>模型名</label>
+        <input id="agentModel" type="text" placeholder="deepseek-chat">
+        <label>API Key（AK）</label>
+        <input id="agentKey" type="password" placeholder="已保存则留空不改；输入后保存即接入">
+        <p class="hint" id="agentModeHint"></p>
+      </div>
+      <div class="modal-foot">
+        <span class="hint" id="agentHint"></span>
+        <button class="btn" onclick="closeModal('agentModal')">取消</button>
+        <button class="btn primary" onclick="submitAgentConfig()">保存设置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 喵喵技能 -->
+  <div class="modal-mask" id="skillsModal" style="display:none">
+    <div class="modal wide">
+      <div class="modal-head"><h3>🧩 喵喵技能 <span class="modal-cat" id="skillsCatName"></span></h3><button class="close" onclick="closeModal('skillsModal')">×</button></div>
+      <div class="modal-body">
+        <p class="hint-block">技能是喵喵提取内容时遵守的<b>规矩（EXTRACT）</b>与主人的<b>喜好（PREFERENCE）</b>。每次提取都会带上启用的技能；主人对提取结果的反馈攒够后，喵喵会自动总结出新技能（来源=喵喵）。</p>
+        <div id="skillList" class="skill-list"></div>
+        <label style="margin-top:14px">✍️ 新增 / 编辑技能</label>
+        <div class="skill-form">
+          <select id="skillKind" style="flex:0 0 160px">
+            <option value="PREFERENCE">喜好 PREFERENCE</option>
+            <option value="EXTRACT">规矩 EXTRACT</option>
+          </select>
+          <input id="skillName" type="text" placeholder="技能名（如：摘要要短）">
+        </div>
+        <textarea id="skillContent" rows="3" placeholder="具体指令内容，例如：摘要不超过 50 字；标签只用英文小写…"></textarea>
+        <input id="skillDescription" type="text" placeholder="一句话描述（可选）">
+      </div>
+      <div class="modal-foot">
+        <span class="hint" id="skillHint"></span>
+        <button class="btn" onclick="closeModal('skillsModal')">关闭</button>
+        <button class="btn primary" onclick="submitSkill()">保存技能</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 猫专属会话区（agentscope-harness · 四层压缩记忆） -->
+  <div class="drawer-mask" id="chatMask" style="display:none" onclick="closeChat()"></div>
+  <aside class="drawer chat-drawer" id="chatDrawer">
+    <div class="drawer-top chat-top">
+      <span class="drawer-badge">💬 专属会话区</span>
+      <select id="chatCatSelect" class="chat-cat-select" onchange="onChatCatChange('drawer')"></select>
+      <span class="chat-top-acts"></span>
+      <button class="close" onclick="closeChat()">×</button>
+    </div>
+    <div class="chat-sub">
+      <span class="chat-ws" id="chatWsInfo" title="会话区的操作范围 = 这只猫的存储文档位置"></span>
+      <span class="chat-sub-acts">
+        <button class="gc-mini gc-cat-btn" id="chatSkillsBtn" title="配置这只猫的喵喵技能">🧩 技能</button>
+        <button class="gc-mini gc-cat-btn" id="chatCfgBtn" title="配置这只猫的喵喵设置">🐱 设置</button>
+        <button class="gc-mini gc-mem-btn" id="chatMemoryBtn" title="记忆状态：点击展开 / 收起">🧠 <span class="gc-mem-pct" id="chatMemPct">--</span></button>
+      </span>
+    </div>
+    <div class="chat-pane" id="chatPane-chat">
+      <div class="chat-msgs" id="chatMsgs"></div>
+      <div class="chat-tools" id="chatTools" style="display:none"></div>
+      <div class="chat-input-row">
+        <textarea id="chatInput" rows="2" placeholder="和这只猫聊聊它工作区里的文档…（Enter 发送，Shift+Enter 换行；/关键词 或 搜 关键词 = 全库搜索）"></textarea>
+        <button class="btn primary chat-send" id="chatSendBtn" onclick="sendChat('drawer')">发送</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 五维三层记忆浮窗（全局唯一实例：图谱常驻栏 🧠 与会话悬浮窗 🧠 共用；放 body 层避免悬浮窗 transform 裁剪 fixed 定位） -->
+  <div class="mem-popup" id="memPopup" style="display:none">
+    <div class="mem-popup-head">
+      <span class="kicker">记忆状态</span>
+      <span class="mem-popup-acts">
+        <button id="memCompressBtn" class="primary" title="标记压缩，下一轮对话生效">标记压缩</button>
+        <button id="memRefreshBtn" title="刷新">↻</button>
+        <button id="memMinBtn" title="收起">—</button>
+        <button id="memCloseBtn" title="关闭">×</button>
+      </span>
+    </div>
+    <div class="mem-popup-body" id="memPopupBody"></div>
+  </div>
+
+  <!-- 专属工作区 · 三栏平铺：🗂 文件树（1/4）｜📄 文件预览（中间）｜💬 会话（1/4，分隔条可拖调宽），
+       高度全部自适应浏览器视口；仅 body.ws-mode 显示（CSS 控制），进工作区时由 JS 装载文件树 -->
+  <aside class="ws-tree" id="wsTreePanel">
+    <div class="ws-tree-head">
+      <span class="ws-tree-title">🗂 工作区文件</span>
+      <span class="ws-tree-cat" id="wsTreeCat"></span>
+    </div>
+    <div class="ws-tree-body" id="wsTree"><div class="ws-tree-empty">加载中…</div></div>
+  </aside>
+  <div class="ws-divider" id="wsDividerTree" title="拖动调整文件树宽度"></div>
+  <section class="ws-file" id="wsFilePanel">
+    <div class="ws-file-head" id="wsFileHead"><span>🗂</span><span class="fp">从左侧选择一个文件查看内容</span></div>
+    <div class="ws-file-body md-body" id="wsFileBody"><div class="empty">左侧选择文件后，这里展示内容（Markdown 渲染）</div></div>
+  </section>
+  <div class="ws-divider" id="wsDivider" title="拖动调整会话区宽度"></div>
+
+  <!-- 会话悬浮球（全站可拖动，点击展开当前猫的会话栏；外观与左上角品牌猫脸一致） -->
+  <button id="wikiOrb" class="wiki-orb" title="💬 会话（可拖动）" aria-label="打开会话">
+    <div class="ico orb-ico"><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span><span class="mouth"></span></div>
+    <span class="orb-dot"></span>
+  </button>
+
+  <!-- 喵的日记 · 事件详情抽屉 -->
+  <div class="modal-mask" id="diaryDrawer" style="display:none" onclick="if(event.target===this)closeEventDrawer()">
+    <div class="modal wide">
+      <div class="modal-head">
+        <h3 id="diaryDrawerTitle">🔍 事件详情</h3>
+        <button class="close" onclick="closeEventDrawer()">×</button>
+      </div>
+      <div class="modal-body" id="diaryDrawerBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" style="display:none"></div>
+  <script src="vendor/g6.min.js?v=20260924-085329"></script>
+  <script src="vendor/marked.min.js?v=20260924-085329"></script>
+  <script src="vendor/highlight.min.js?v=20260924-085329"></script>
+  <script src="vendor/jszip.min.js?v=20260924-085329"></script>
+  <!-- 前端按域拆分：core(基础设施) → views(视图分发) → 各业务域 → boot(启动入口最后) -->
+  <script src="core.js?v=20260924-085329"></script>
+  <script src="views.js?v=20260924-085329"></script>
+  <script src="shelf.js?v=20260924-085329"></script>
+  <script src="study.js?v=20260924-085329"></script>
+  <script src="graph.js?v=20260924-085329"></script>
+  <script src="content.js?v=20260924-085329"></script>
+  <script src="manage.js?v=20260924-085329"></script>
+  <script src="agent.js?v=20260924-085329"></script>
+  <script src="workspace.js?v=20260924-085329"></script>
+  <script src="feedback.js?v=20260924-085329"></script>
+  <script src="chat.js?v=20260924-085329"></script>
+  <script src="export.js?v=20260924-085329"></script>
+  <script src="diary.js?v=20260924-085329"></script>
+  <script src="boot.js?v=20260924-085329"></script>
+</body>
+</html>

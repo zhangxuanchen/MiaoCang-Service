@@ -1,0 +1,65 @@
+sidecar/ 里内嵌的 laya 推理代码来源与合规说明
+==========================================
+
+上游项目：laya —— Fast, non-autoregressive System 1 decision engine
+           作者：Convai Innovations
+           https://huggingface.co/convaiinnovations/laya
+拷贝来源：/Users/zxc/Documents/ai/laya/（本地克隆）
+版本：    0.3.6（与 laya/__init__.py 的 __version__ 一致）
+拷贝日期：2026-09-23
+
+拷贝范围
+--------
+1. sidecar/laya/*.py        —— 上游 Python 包原样拷贝，**未改一行**（含 agent.py /
+                               common.py / email.py / lang.py / presets.py / router.py /
+                               shortlist.py / __init__.py）。shortlist.py 必须保留：
+                               __init__.py 会 import 它。
+                               升级上游时重新拷贝该目录即可，不涉及任何本地改动合并。
+2. sidecar/LICENSE          —— 上游 Apache-2.0 许可证原文（合规必需，勿删）。
+3. sidecar/laya_server.py   —— 派生自上游 java/backend/server.py（Apache-2.0，
+                               Copyright Convai Innovations）。
+4. sidecar/requirements.txt —— 依赖清单（上游 pyproject.toml 的 dependencies 子集）。
+
+派生作品的变更声明（Apache-2.0 第 4(b) 条）
+------------------------------------------
+sidecar/laya_server.py 是实现 P0 接入（内容分类打分、会话意图短路）时，以
+上游 java/backend/server.py 为基础改写而来，已按许可证第 4(b) 条在文件头标注
+「派生自 …，已被修改」。相对上游的实际改动：
+
+  a. 删除上游的测试台 UI（`GET /`）与 `/api/*` 端点，只保留 /health、/v1/predict、
+     /v1/preload 三个 Java 契约端点；
+  b. `POST /v1/predict` 的 `model` 缺省由 english 改为自动路由；
+  c. 新增请求体上限 MAX_BODY_BYTES（2 MB）；
+  d. HTTP 端口缺省由 8770 改为 8777，避免与上游 server.py 同时运行时冲突。
+
+注意：sidecar/laya/*.py 未改一行，故不触发第 4(b) 条的修改声明义务；上游包内
+无版权头、仓库根无 NOTICE 文件，故第 4(c)/4(d) 条无需额外保留或传递的内容。
+
+本项目的 Java / 前端代码为原创实现（自写薄客户端 LayaDecisionClient 等），未拷贝
+上游 java/ 目录下的源码或文档；docs/ 与 .trae/documents/ 下的集成文档亦为自行撰写。
+
+未拷贝的部分
+------------
+上游仓库的 java/（含 Java SDK 与另一份 HTTP 后端）、research/、notebooks/、demo/、
+tests/、assets/ 均未纳入。喵藏不引上游 Java SDK：它未发布到 Maven 中央仓库，
+用它会引入外部工程构建产物，并把 jackson-databind 钉在 2.17.1 与 Spring Boot BOM 冲突；
+Java 侧改用自写的薄客户端 LayaDecisionClient。
+
+模型权重
+--------
+模型权重位于 data/laya/models/，属本仓库的本地数据目录，**不随源码分发**。
+权重来源：HuggingFace 仓库 convaiinnovations/laya，许可为 Apache License 2.0
+（非 gated、非 private），与上游代码同一许可证。
+若将来要随发行包一同分发权重，需一并提供 sidecar/LICENSE 全文。
+
+再分发要求（重要）
+------------------
+本目录内容再分发时，必须同时提供以下两项，缺一不可：
+  * sidecar/LICENSE —— Apache-2.0 许可证全文；
+  * sidecar/laya/   —— 上游 Python 包（本文件「拷贝范围」第 1 条）。
+建议同时保留本文件，以说明来源、版本与变更。
+
+商标与背书
+----------
+本项目（喵藏）与 Convai Innovations 无隶属、赞助或背书关系；「laya」名称与相关权利
+归其各自权利人所有，本仓库仅为技术集成的引用说明，不代表上游认可本项目。

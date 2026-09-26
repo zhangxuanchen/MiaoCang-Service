@@ -1,0 +1,117 @@
+喵藏（MiaoCang-Service）第三方组件许可声明
+==========================================
+
+本文件汇总本仓库随源码/构建产物分发的第三方组件及其许可信息。
+本仓库自身的代码不在此列；内嵌的 laya 推理代码见 sidecar/UPSTREAM.txt。
+
+一、前端 vendored 库（src/main/resources/static/vendor/）
+--------------------------------------------------------
+
+1. @antv/g6 v5.0.49 —— g6.min.js
+   许可证：MIT
+   版权：  AntV（G6 项目，https://github.com/antv/G6）
+   备注：  该 bundle 未保留 G6 自身的许可横幅（包内仅见内嵌依赖 Comlink 的
+           Apache-2.0 声明与 regenerator-runtime 的 MIT 片段），故在此补记。
+   内嵌依赖：
+     * Comlink —— Copyright 2019 Google LLC，SPDX-License-Identifier: Apache-2.0
+     * regenerator-runtime —— Copyright (c) 2014-present, Facebook, Inc.，MIT
+       （bundle 内已保留二者的声明片段）
+
+2. mermaid v11.17.2 —— mermaid.min.js
+   许可证：MIT
+   版权：  Knut Sveidqvist 及 mermaid 贡献者（https://github.com/mermaid-js/mermaid）
+   备注：  该 bundle 未保留 mermaid 自身的许可横幅，但在文件尾部保留了完整的
+           "Bundled license information" 块，逐条列出其内嵌依赖的许可，含：
+     * DOMPurify 3.4.12 —— (c) Cure53 and other contributors，
+       Apache License 2.0 与 Mozilla Public License 2.0 双许可
+       （本仓库按 Apache-2.0 使用，全文见 sidecar/LICENSE）
+     * lodash —— Copyright OpenJS Foundation and other contributors，MIT
+     * cytoscape —— MIT（及其内嵌的若干 MIT 片段，详见 bundle 尾部该块）
+
+3. marked v5.1.2 —— marked.min.js
+   许可证：MIT
+   版权：  Copyright (c) 2011-2023, Christopher Jeffrey
+   备注：  bundle 头部已保留完整横幅（含版本、版权与 "MIT Licensed"）。
+
+4. JSZip v3.10.1 —— jszip.min.js
+   许可证：MIT 或 GPLv3（双许可）；本仓库按 MIT 使用
+   版权：  Copyright (c) 2009-2016 Stuart Knightley 等 JSZip 贡献者
+   备注：  bundle 头部已保留完整横幅；其内嵌的 pako 亦为 MIT。
+
+5. highlight.js v11.9.0 —— highlight.min.js 及主题 highlight-atom-one-dark.min.css
+   许可证：BSD-3-Clause
+   版权：  Copyright (c) 2006, Ivan Sagalaev
+   备注：  bundle 头部已保留横幅，但官方 min 产物把作者名渲染为
+           "(c) 2006-2023 undefined and other contributors" —— 这是上游打包脚本
+           的模板变量未替换所致，非本仓库改动；实际版权方为 Ivan Sagalaev 等
+           highlight.js 贡献者。
+
+二、服务端内嵌组件
+------------------
+
+6. laya v0.3.6 —— sidecar/laya/*.py 与 sidecar/laya_server.py
+   许可证：Apache License 2.0，版权 Convai Innovations
+   说明：  许可全文见 sidecar/LICENSE，来源、版本、变更与再分发要求见 sidecar/UPSTREAM.txt。
+
+三、分发注意事项
+----------------
+
+* 上述前端库以压缩产物形式随应用静态资源一同分发，其许可横幅已尽量保留；
+  本文件补齐个别 bundle 缺失的版权声明，并附 MIT / BSD-3-Clause 全文如下，
+  以满足「在副本中保留版权声明与许可声明」的要求。
+* 模型权重（data/laya/models/）与 Python 虚拟环境（sidecar/.venv/）不随源码分发，
+  已由 .gitignore 排除。
+
+
+MIT License
+-----------
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+BSD 3-Clause License
+--------------------
+
+Copyright (c) 2006, Ivan Sagalaev
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

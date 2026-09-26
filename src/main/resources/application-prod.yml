@@ -1,0 +1,18 @@
+# 生产运行 profile（bin/mc.sh 以 --spring.profiles.active=prod 启动时生效）
+# 与 application.yml（开发默认）的差异：关 h2-console + 日志落文件滚动
+spring:
+  h2:
+    console:
+      # 生产态关闭：/h2-console 无密码暴露等于全库裸奔；要看库用 dev 模式或本地 H2 工具连文件
+      enabled: false
+
+logging:
+  file:
+    # 相对启动目录（项目根）——LaunchAgent 的 WorkingDirectory 固定到项目根，路径即稳定
+    name: data/logs/miaocang.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: data/logs/miaocang-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 20MB
+      max-history: 14
+      total-size-cap: 200MB

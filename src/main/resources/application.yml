@@ -1,0 +1,164 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: miaocang-service
+  web:
+    resources:
+      # 静态资源协商缓存：每次都向服务器校验新鲜度，改完页面普通刷新即可生效（避免浏览器缓存旧版）
+      cache:
+        cachecontrol:
+          no-cache: true
+  datasource:
+    url: jdbc:h2:file:./data/miaocang;MODE=MySQL;AUTO_SERVER=TRUE;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 60MB
+
+miaocang:
+  # 引力波分类引擎配置
+  gravity:
+    # 标题命中关键词的权重
+    title-weight: 3.0
+    # 正文命中单个关键词的最大计次（防止刷词）
+    max-occurrences: 8
+    # 最低归档得分，低于该值进入收集箱
+    min-score: 2.0
+    # 正文抽取最大长度（字符）
+    max-text-length: 20000
+  files:
+    # 上传文件保存目录
+    dir: ./data/files
+  library:
+    # 书库目录（与喵藏客户端书库格式完全一致，作为 git 仓库与客户端互相同步）
+    dir: ./data/library
+    # 可选：自动 push 的远端（如客户端书库路径或中转仓库）；留空则只 commit，由客户端 pull
+    git-remote: ""
+  # 每猫专属会话区配置（agentscope-harness + 四层压缩记忆）
+  chat:
+    # 工作区子目录前缀（与 LibrarySyncService.root() 拼接 = 每只猫的专属工作区根）
+    # 实际路径 = <library.dir>/<cat.workspacePath>/，由 CatWorkspaceService 解析
+    workspace-base: ${miaocang.library.dir}
+    # 工作区内子目录：记忆状态、归档、工具执行 sandbox
+    context-dir: .context
+    archive-dir: .archive
+    sandbox-dir: .workbench
+    # 单轮对话超时（毫秒）：超时 SseEmitter 自动断开
+    timeout-ms: 600000
+    # 心跳间隔（毫秒）：长会话期间定期发 ping 防止代理掐断
+    heartbeat-ms: 15000
+    # 四层压缩阈值（与 Memory-Observatory 一致）
+    # L1：单条消息超过该字符数 → 头 6000 + 尾 2000 截断
+    truncate-threshold: 12000
+    truncate-head: 6000
+    truncate-tail: 2000
+    # L2：超过该轮数 → 最旧一轮折叠进 summary，原文归档
+    keep-recent: 5
+    # L3：summary 累计超过该字符数 → 调模型重摘要（否则规则累加截断）
+    summary-threshold: 2000
+    # 摘要兜底上限（规则累加时截断）
+    max-summary-chars: 2000
+    # 用户主动「标记压缩」后下一轮执行时的记忆区目标体积（字符）
+    compress-target-chars: 30000
+    # 折叠足迹文件最大记录条数
+    fold-trail-cap: 20
+    # 压缩日志每 key 保留条数（in-memory）
+    compress-log-cap: 20
+
+  # laya 决策引擎（仓库内嵌推理侧车，不依赖任何外部工程）
+  # 应用启动时由 LayaSidecarManager 检测环境 → 必要时自动跑 bin/laya-setup.sh → 拉起子进程 → 探活 → 自检
+  laya:
+    # 总开关：false 时侧车不拉起，内容分类与会话意图两个接入点完全走原有路径
+    enabled: true
+    # 是否由本应用拉起侧车；false = 只连已有侧车（systemd 托管 / 开发时手动起）
+    auto-start: true
+    # venv 或权重缺失时是否自动跑 bin/laya-setup.sh（首次会联网下载约 650MB 权重）
+    auto-prepare: true
+    # Python 解释器（仓库内 venv）；找不到时回退 python3
+    python: sidecar/.venv/bin/python
+    # 侧车入口脚本（相对仓库根）
+    script: sidecar/laya_server.py
+    # 权重根目录：<models-dir>/<name> 存在即按本地目录加载，命中即不联网
+    models-dir: data/laya/models
+    # 侧车监听地址：侧车无鉴权，必须保持 loopback
+    host: 127.0.0.1
+    # 端口；0 = 自动挑一个空闲端口。刻意避开上游 laya/java/backend/server.py 的默认 8770
+    port: 8777
+    # 推理设备（cpu / mps / cuda）
+    device: cpu
+    # 注入 OMP_NUM_THREADS：torch 默认按物理核起满线程，会与 Spring 抢 CPU
+    cpu-threads: 2
+    # checkpoint：固定 multilingual（中文场景）；填 auto 才启用按语言自动路由
+    model: multilingual
+    # 启动时预加载的 checkpoint
+    preload:
+      - multilingual
+    # 探活超时（秒）：首次含权重加载，给足
+    startup-timeout-seconds: 180
+    # 探活轮询间隔（毫秒）
+    poll-interval-ms: 1000
+    # 侧车 stdout/stderr 落盘位置
+    log-file: data/logs/laya.log
+    # 就绪后跑一次真实判定自检（把「侧车可用」变成日志里的事实）
+    self-test: true
+    # P0-1 内容自动分类打分
+    classify:
+      # 单次判定超时（毫秒）；超时即降级回关键词打分
+      timeout-ms: 1500
+      # 关键词预筛的候选分类上限（multilingual 的选项头只有 256，不能多）
+      top-k: 12
+      # state 正文截断字符数（状态区只剩 768 token，中文约 1 token/字）
+      state-max-chars: 600
+      # 归档门控：top1 概率下限
+      min-prob: 0.45
+      # 归档门控：top1−top2 间隔下限（温度校准前不能用绝对置信度）
+      margin: 0.15
+    # P0-2 会话意图快路由
+    intent:
+      # 单次判定超时（毫秒）；与领地检索并发，超时即放弃走原路径
+      timeout-ms: 800
+      # 短路门控：certain（是否确定性指令）的下限
+      sure-threshold: 0.90
+      # 未短路时是否把预判作为软提示注入提示词
+      hint-enabled: true
+    # P0-3 成书归位：把理解卡片判进「二级主题（节）」——比内容归档更细一层的分类
+    placement:
+      # 总开关；false = 成书归位完全由 LLM 决定（行为与接入前一致）
+      enabled: true
+      # 单卡判定超时（毫秒）；单卡实测 80~130ms
+      timeout-ms: 2000
+      # 本轮总预算（毫秒）：超时即停判，剩余卡片直接交给 LLM 归位，不拖住整理任务
+      budget-ms: 60000
+      # 候选节上限（multilingual 选项头只有 256，太多会衰减甚至超长失败）
+      max-options: 24
+      # state 正文截断字符数（卡片 topic + point）
+      state-max-chars: 400
+      # 采用门控：top1 概率下限（本层主门控）
+      # 实测（54 张卡 / 8 个候选节）：判对的卡 p1 = 0.41~0.998；而主题不在任何候选里的卡，
+      # 模型仍会硬挑一个并给出 0.47，且 p2 仅 0.13 —— 这种「自信的错放」间隔门控拦不住。
+      # 取 0.5 在实测里正好把错放全部挡在门外：宁可多交 LLM 兜底，也不静默放错位置。
+      min-prob: 0.50
+      # 采用门控：top1−top2 间隔下限（温度校准前不能用绝对置信度，间隔才是稳的信号）
+      margin: 0.20
+
+logging:
+  level:
+    com.miaocang: info
+    # agentscope 调试时改为 debug
+    io.agentscope: info

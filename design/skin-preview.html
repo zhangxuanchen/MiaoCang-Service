@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-skin="pop">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>喵藏 · 皮肤方案预览</title>
+<style>
+/* ============================================================
+   皮肤方案预览 · 四套
+   全部组件走变量（--bg/--panel/--ink/--accent/--bw/--radius/--shadow）
+   换 data-skin 即换肤，不需要改任何组件规则
+   ============================================================ */
+
+/* ---------- 0. 现状：喵藏波普风（Pop Neo-brutalism） ---------- */
+[data-skin="pop"] {
+  --bg: #FFF6E9;
+  --panel: #FFFDF7;
+  --panel-2: #FFF3DC;
+  --ink: #1E1B2E;
+  --muted: rgba(30,27,46,.62);
+  --line: rgba(30,27,46,.16);
+  --accent: #FF4D8D;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FFE3EE;
+  --yellow: #FFC93C;
+  --ok: #2DD4A8;
+  --warn: #FF7A3C;
+  --danger: #FF5252;
+  --bw: 3px;
+  --bw-ico: 3px;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow: 6px 6px 0 var(--ink);
+  --shadow-sm: 4px 4px 0 var(--ink);
+  --dot: radial-gradient(rgba(30,27,46,.07) 1.6px, transparent 1.6px);
+  --dot-size: 26px 26px;
+  --font-head: inherit;
+  --head-weight: 900;
+  --head-spacing: .01em;
+}
+
+/* ---------- A. 纸感书斋（Paper Study） ---------- */
+[data-skin="paper"] {
+  --bg: #FAF7F0;
+  --panel: #FFFFFF;
+  --panel-2: #F3EFE6;
+  --ink: #221F1B;
+  --muted: rgba(34,31,27,.66);
+  --line: rgba(34,31,27,.13);
+  --accent: #A8382C;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #F6E7E3;
+  --yellow: #C99A3A;
+  --ok: #3E6B4F;
+  --warn: #8A6618;
+  --danger: #A8382C;
+  --bw: 1px;
+  --bw-ico: 1.5px;
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow: 0 1px 2px rgba(34,31,27,.05);
+  --shadow-sm: 0 1px 1px rgba(34,31,27,.04);
+  --dot: none;
+  --dot-size: 0 0;
+  --font-head: "Songti SC","Source Han Serif SC",Georgia,serif;
+  --head-weight: 600;
+  --head-spacing: .02em;
+}
+
+/* ---------- B. 深夜书房（Night Library） ---------- */
+[data-skin="night"] {
+  --bg: #12141A;
+  --panel: #1A1D25;
+  --panel-2: #212530;
+  --ink: #E9E5DC;
+  --muted: rgba(233,229,220,.54);
+  --line: rgba(233,229,220,.13);
+  --accent: #E2A857;
+  --accent-ink: #20180C;
+  --accent-soft: rgba(226,168,87,.15);
+  --yellow: #E2A857;
+  --ok: #6FC08F;
+  --warn: #E2A857;
+  --danger: #E97A6E;
+  --bw: 1px;
+  --bw-ico: 1.5px;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 14px rgba(0,0,0,.45);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.35);
+  --dot: none;
+  --dot-size: 0 0;
+  --font-head: inherit;
+  --head-weight: 600;
+  --head-spacing: .01em;
+}
+
+/* ---------- C. 薄荷几何（Mint Grid） ---------- */
+[data-skin="mint"] {
+  --bg: #F6F9F8;
+  --panel: #FFFFFF;
+  --panel-2: #EDF3F1;
+  --ink: #16241F;
+  --muted: rgba(22,36,31,.64);
+  --line: rgba(22,36,31,.10);
+  --accent: #0A7D63;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E1F3EE;
+  --yellow: #C08A22;
+  --ok: #0A7D63;
+  --warn: #8F6414;
+  --danger: #C43F39;
+  --bw: 1px;
+  --bw-ico: 1.5px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(22,36,31,.07);
+  --shadow-sm: 0 1px 1px rgba(22,36,31,.05);
+  --dot: linear-gradient(rgba(22,36,31,.045) 1px, transparent 1px),
+         linear-gradient(90deg, rgba(22,36,31,.045) 1px, transparent 1px);
+  --dot-size: 22px 22px;
+  --font-head: inherit;
+  --head-weight: 600;
+  --head-spacing: 0;
+}
+
+/* ============================================================
+   页面外壳（不参与换肤）
+   ============================================================ */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei",Helvetica,Arial,sans-serif;
+  background: #0F1115;
+  color: #D8DCE3;
+  font-size: 14px;
+}
+.switcher {
+  position: sticky; top: 0; z-index: 99;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 20px;
+  background: #0F1115;
+  border-bottom: 1px solid #262B35;
+}
+.switcher strong { font-size: 13px; font-weight: 600; color: #8C94A3; margin-right: 6px; }
+.sbtn {
+  font-family: inherit; font-size: 13px; cursor: pointer;
+  padding: 7px 14px; border-radius: 8px;
+  background: #1B1F28; color: #D8DCE3;
+  border: 1px solid #2C323D;
+  transition: background .15s, border-color .15s;
+}
+.sbtn:hover { background: #232833; }
+.sbtn.on { background: #E8EBF0; color: #12141A; border-color: #E8EBF0; font-weight: 600; }
+.note {
+  margin: 16px 20px 0; padding: 14px 18px;
+  background: #171B22; border: 1px solid #262B35; border-radius: 10px;
+  color: #A8B0BE; font-size: 13px; line-height: 1.7;
+}
+.note b { color: #E8EBF0; font-weight: 600; }
+.note code { background: #232833; padding: 1px 6px; border-radius: 4px; font-size: 12px; color: #9FD5C1; }
+
+.stage { padding: 20px; }
+.caption {
+  font-size: 13px; color: #8C94A3; margin: 0 0 12px 2px;
+}
+.caption b { color: #E8EBF0; font-weight: 600; }
+.caption .cost { color: #E2A857; }
+
+/* 应用框：换肤范围就是它 */
+.app {
+  background: var(--bg);
+  background-image: var(--dot);
+  background-size: var(--dot-size);
+  color: var(--ink);
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #262B35;
+  font-size: 14px;
+}
+.app * { box-sizing: border-box; }
+
+/* ---------- 顶栏 ---------- */
+.tb {
+  display: flex; align-items: center; gap: 16px;
+  padding: 10px 20px;
+  background: var(--bg);
+  border-bottom: var(--bw) solid var(--ink);
+}
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-t { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-t strong { font-size: 19px; font-weight: var(--head-weight); letter-spacing: 2px; font-family: var(--font-head); }
+.brand-t small { color: var(--accent); font-size: 11px; font-weight: 700; letter-spacing: .18em; }
+.tb-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+/* CSS 猫头（品牌资产，跨皮肤保留） */
+.ico {
+  position: relative; flex: none;
+  width: 38px; height: 38px;
+  border: var(--bw-ico) solid var(--ink); border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  background: var(--yellow);
+  display: flex; align-items: center; justify-content: center;
+}
+.ico::before, .ico::after {
+  content: ""; position: absolute; top: -9px; width: 12px; height: 12px;
+  background: inherit; border: var(--bw-ico) solid var(--ink);
+  border-radius: 4px 4px 0 0;
+}
+.ico::before { left: 4px; transform: rotate(-24deg); }
+.ico::after { right: 4px; transform: rotate(24deg); }
+.ico .eye { position: absolute; top: 42%; width: 5px; height: 8px; background: var(--ink); border-radius: 50%; }
+.ico .eye.l { left: 26%; } .ico .eye.r { right: 26%; }
+.ico .blush { position: absolute; top: 57%; width: 6px; height: 4px; background: var(--accent); border-radius: 50%; opacity: .85; }
+.ico .blush.l { left: 13%; } .ico .blush.r { right: 13%; }
+.ico .mouth {
+  position: absolute; bottom: 21%; left: 50%; transform: translateX(-50%);
+  width: 11px; height: 5px; border: calc(var(--bw-ico) * .8) solid var(--ink); border-top: none;
+  border-radius: 0 0 10px 10px;
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  font-family: inherit; font-size: 13px; cursor: pointer;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--ink);
+  border: var(--bw) solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  transition: transform .12s, box-shadow .12s;
+}
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.ghost { background: transparent; border-color: var(--line); box-shadow: none; color: var(--muted); }
+.btn.danger { background: var(--panel); color: var(--danger); border-color: var(--danger); }
+.btn:hover { transform: translate(-1px,-1px); }
+
+.user-box {
+  font-size: 12px; color: var(--muted);
+  padding: 5px 12px; border-radius: 999px;
+  border: var(--bw) solid var(--line);
+}
+
+/* ---------- 主体两栏 ---------- */
+.body-grid { display: grid; grid-template-columns: 210px 1fr; min-height: 460px; }
+
+/* 侧栏 */
+.sb { background: var(--panel-2); border-right: var(--bw) solid var(--ink); padding: 12px 10px; }
+.sb-title {
+  font-family: var(--font-head);
+  font-size: 12px; font-weight: 700; letter-spacing: .18em;
+  color: var(--muted); text-transform: uppercase;
+  padding: 6px 10px 12px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--ink);
+  border: var(--bw) solid transparent;
+  margin-bottom: 3px; cursor: pointer;
+}
+.sb-item:hover { background: var(--panel); border-color: var(--line); }
+.sb-item.on { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); font-weight: 600; }
+.sb-item .n { margin-left: auto; font-size: 11px; color: var(--muted); }
+.sb-sub { padding-left: 18px; font-size: 12.5px; color: var(--muted); }
+
+/* 主区 */
+.main-p { padding: 22px 24px; }
+h1.ph { font-family: var(--font-head); font-size: 22px; font-weight: var(--head-weight); letter-spacing: var(--head-spacing); margin: 0 0 4px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+
+.kicker {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--ink); color: var(--bg);
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  padding: 5px 13px; border-radius: 999px;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.kicker::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.card {
+  background: var(--panel);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 15px;
+}
+.card h3 {
+  font-family: var(--font-head);
+  font-size: 14px; font-weight: var(--head-weight); margin: 0 0 6px;
+}
+.card p { font-size: 12.5px; color: var(--muted); margin: 0 0 10px; line-height: 1.55; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 11px; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent);
+  border: var(--bw) solid var(--accent);
+}
+.tag.g { background: transparent; color: var(--ok); border-color: var(--ok); }
+.tag.y { background: transparent; color: var(--warn); border-color: var(--warn); }
+.tag.n { background: transparent; color: var(--muted); border-color: var(--line); }
+
+/* 正文阅读区 */
+.reader {
+  margin-top: 18px;
+  background: var(--panel);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+}
+.reader h2 { font-family: var(--font-head); font-size: 16px; font-weight: var(--head-weight); margin: 0 0 10px; }
+.reader p { font-size: 13.5px; line-height: 1.85; margin: 0 0 10px; }
+.reader .hl { background: linear-gradient(transparent 60%, var(--accent-soft) 60%); padding: 0 3px; font-weight: 600; }
+.reader blockquote {
+  margin: 12px 0; padding: 8px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--panel-2);
+  color: var(--muted); font-size: 13px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+/* ---------- 表单 ---------- */
+.fieldrow { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 14px; }
+label.fl { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+input[type=text], select, textarea {
+  font-family: inherit; font-size: 13px; width: 100%;
+  padding: 8px 11px; border-radius: var(--radius-sm);
+  background: var(--panel); color: var(--ink);
+  border: var(--bw) solid var(--line);
+}
+input[type=text]::placeholder, textarea::placeholder { color: var(--muted); opacity: .7; }
+
+/* ---------- 会话气泡 ---------- */
+.chat { margin-top: 18px; }
+.msg { display: flex; gap: 9px; margin-bottom: 12px; }
+.msg .av {
+  flex: none; width: 28px; height: 28px; border-radius: 9px;
+  border: var(--bw) solid var(--ink); background: var(--yellow);
+  box-shadow: var(--shadow-sm);
+}
+.bub {
+  max-width: 74%; padding: 9px 13px; font-size: 13px; line-height: 1.65;
+  background: var(--panel); border: var(--bw) solid var(--ink);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm);
+}
+.msg.me { flex-direction: row-reverse; }
+.msg.me .bub { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+/* ---------- 弹窗示意 ---------- */
+.modal-demo {
+  position: relative; margin-top: 18px;
+  border-radius: var(--radius);
+  padding: 20px;
+  background: var(--panel-2);
+  border: var(--bw) dashed var(--line);
+}
+.modal-demo > .lbl { font-size: 11px; color: var(--muted); letter-spacing: .1em; margin-bottom: 12px; text-transform: uppercase; }
+.modal {
+  background: var(--panel);
+  border: var(--bw) solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  max-width: 420px;
+}
+.modal-h {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; border-bottom: var(--bw) solid var(--line);
+}
+.modal-h h3 { font-family: var(--font-head); font-size: 14px; font-weight: var(--head-weight); margin: 0; }
+.modal-h .x { font-size: 17px; color: var(--muted); line-height: 1; }
+.modal-b { padding: 16px; }
+.modal-f {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 16px; border-top: var(--bw) solid var(--line);
+  background: var(--panel-2);
+}
+
+.tabs { display: flex; gap: 4px; border-bottom: var(--bw) solid var(--line); margin-bottom: 14px; }
+.tab {
+  font-family: inherit; font-size: 12.5px; cursor: pointer;
+  padding: 7px 12px; background: transparent; color: var(--muted);
+  border: none; border-bottom: 2px solid transparent; margin-bottom: calc(var(--bw) * -1);
+}
+.tab.on { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ---------- 底部色卡 ---------- */
+.swatches { display: flex; gap: 0; margin-top: 18px; border: var(--bw) solid var(--ink); border-radius: var(--radius); overflow: hidden; }
+.sw { flex: 1; height: 42px; display: flex; align-items: flex-end; justify-content: center; }
+.sw span { font-size: 10px; padding-bottom: 4px; color: var(--ink); opacity: .75; }
+</style>
+</head>
+<body>
+
+<div class="switcher">
+  <strong>皮肤方案</strong>
+  <button class="sbtn on" data-go="pop">0 · 现状（波普）</button>
+  <button class="sbtn" data-go="paper">A · 纸感书斋</button>
+  <button class="sbtn" data-go="night">B · 深夜书房</button>
+  <button class="sbtn" data-go="mint">C · 薄荷几何</button>
+</div>
+
+<div class="note">
+  <b>四套皮肤共用同一份组件 CSS</b>，只有变量块不同。改 <code>data-skin</code> 一个值即换肤，组件规则一行不用动 ——
+  <b>前提是颜色和形状都走了变量</b>。<br><br>
+  <b>本页与真实站点的差距（必读）</b>：本页是<b>变量驱动</b>的，只演示了变量覆盖到的那部分。真实
+  <code>style.css</code> 审计结果：变量覆盖 <b>63%</b>，另有 <b>409 处硬编码色值</b>（主犯是书架区那套没走变量的绿：
+  <code>#0F6E56</code> 95 处、<code>#DFF3EC</code> 30 处）；描边宽度硬编码 <b>353 处</b>、硬偏移阴影 <b>84 处</b>。<br>
+  也就是说：<b>换上去后，书架 / 收集箱那片绿色不会跟着变</b>，粗描边也不会自动变细。要落地，得先补十几个变量收编那 409 处，
+  再抽 <code>--bw</code> / <code>--shadow</code> / <code>--radius</code>（这正是本页演示的做法）。
+</div>
+
+<div class="stage">
+  <p class="caption" id="caption"></p>
+
+  <div class="app" id="app">
+
+    <!-- 顶栏 -->
+    <div class="tb">
+      <div class="brand">
+        <div class="ico"><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span><span class="mouth"></span></div>
+        <div class="brand-t"><strong>喵藏</strong><small>内容引力波 · 个人 Wiki</small></div>
+      </div>
+      <div class="tb-actions">
+        <button class="btn ghost">🏛 总览</button>
+        <span class="user-box">zxc</span>
+      </div>
+    </div>
+
+    <!-- 两栏 -->
+    <div class="body-grid">
+
+      <!-- 侧栏 -->
+      <aside class="sb">
+        <div class="sb-title">书房 · SHELF</div>
+        <div class="sb-item on">🧠 人工智能 <span class="n">128</span></div>
+        <div class="sb-item">💼 职场管理 <span class="n">64</span></div>
+        <div class="sb-item">📈 投资笔记 <span class="n">41</span></div>
+        <div class="sb-item">🏗 系统设计 <span class="n">33</span></div>
+        <div class="sb-title" style="padding-top:16px">书 · BOOKS</div>
+        <div class="sb-item sb-sub">《2026 AI 落地笔记》</div>
+        <div class="sb-item sb-sub">《Agent 缰绳工程》</div>
+        <div class="sb-item sb-sub">《估值实操手册》</div>
+      </aside>
+
+      <!-- 主区 -->
+      <main class="main-p">
+        <span class="kicker">Knowledge Base</span>
+        <h1 class="ph">人工智能</h1>
+        <p class="sub">128 条内容 · 6 本书 · 最近更新 2 小时前</p>
+
+        <div class="cards">
+          <div class="card">
+            <h3>Agent 记忆的四种失效</h3>
+            <p>上下文溢出、检索失准、规则腐烂、快照过期 —— 各自的表现和修法。</p>
+            <div class="tags"><span class="tag">记忆</span><span class="tag g">已归档</span></div>
+          </div>
+          <div class="card">
+            <h3>Harness 七层怎么切</h3>
+            <p>模型决定上限，Harness 决定可靠性。分层是为了让失败可归因。</p>
+            <div class="tags"><span class="tag">Harness</span><span class="tag y">待整理</span></div>
+          </div>
+          <div class="card">
+            <h3>评估指标别写极值</h3>
+            <p>「降到 0」是只有靠少干活才能达成的目标，写区间才有意义。</p>
+            <div class="tags"><span class="tag">评估</span><span class="tag n">草稿</span></div>
+          </div>
+        </div>
+
+        <div class="reader">
+          <h2>为什么"频次"比"质量"好用</h2>
+          <p>质量没有读数，频次有。每次任务都不一样，跑一次对了不代表方法对 —— 但<span class="hl">同一类错误出现的次数</span>是确定的、可复现的、零标注的。</p>
+          <p>这就是换元：不测不可测的东西，改数可数的东西。</p>
+          <blockquote>空调不知道你舒不舒服，它只知道室温几度。</blockquote>
+        </div>
+
+        <div class="fieldrow">
+          <div>
+            <label class="fl">目标书</label>
+            <select><option>《2026 AI 落地笔记》</option><option>《Agent 缰绳工程》</option></select>
+          </div>
+          <div>
+            <label class="fl">目标目录</label>
+            <input type="text" placeholder="如：数据库与存储">
+          </div>
+        </div>
+
+        <!-- 会话 -->
+        <div class="chat">
+          <div class="msg me">
+            <div class="av"></div>
+            <div class="bub">这只猫的工作区里有哪些文档？</div>
+          </div>
+          <div class="msg">
+            <div class="av"></div>
+            <div class="bub">工作区里有 12 个 md 文件，主要分三类：Harness 笔记 6 个、评估方法论 4 个、草稿 2 个。要我把草稿归类吗？</div>
+          </div>
+        </div>
+
+        <!-- 弹窗 -->
+        <div class="modal-demo">
+          <div class="lbl">Modal · 采集内容</div>
+          <div class="modal">
+            <div class="modal-h"><h3>采集内容</h3><span class="x">×</span></div>
+            <div class="modal-b">
+              <div class="tabs">
+                <button class="tab on">🔗 网页链接</button>
+                <button class="tab">📝 文本</button>
+                <button class="tab">📄 Word / Excel</button>
+              </div>
+              <input type="text" placeholder="粘贴网页链接，如 https://example.com/article">
+            </div>
+            <div class="modal-f">
+              <button class="btn">取消</button>
+              <button class="btn primary">投递并引力归档</button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- 色卡 -->
+    <div class="modal-demo" style="margin:0;border-radius:0;border-left:none;border-right:none;border-bottom:none">
+      <div class="lbl">Palette</div>
+      <div class="swatches" style="margin-top:0">
+        <div class="sw" style="background:var(--bg)"><span>bg</span></div>
+        <div class="sw" style="background:var(--panel)"><span>panel</span></div>
+        <div class="sw" style="background:var(--panel-2)"><span>panel-2</span></div>
+        <div class="sw" style="background:var(--ink)"><span style="color:var(--bg)">ink</span></div>
+        <div class="sw" style="background:var(--accent)"><span style="color:var(--accent-ink)">accent</span></div>
+        <div class="sw" style="background:var(--accent-soft)"><span>soft</span></div>
+        <div class="sw" style="background:var(--ok)"><span>ok</span></div>
+        <div class="sw" style="background:var(--warn)"><span>warn</span></div>
+        <div class="sw" style="background:var(--danger)"><span>danger</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var CAPS = {
+  pop:   '<b>0 · 现状：喵藏波普风</b> —— 奶油纸底 + 波点 + 粗描边 + 硬偏移阴影 + 撞色。<span class="cost">迁移成本：0（就是现在线上这套）</span>',
+  paper: '<b>A · 纸感书斋</b> —— 宣纸白底、细线、无阴影、朱砂一点红，标题转宋体。安静、像纸书。<span class="cost">迁移成本：低（只换颜色 + 抽 --bw/--shadow）</span>',
+  night: '<b>B · 深夜书房</b> —— 深墨底 + 暖白字 + 琥珀金强调。长文夜读不刺眼。<span class="cost">迁移成本：中（需处理 64 处 rgba 硬编码的墨色）</span>',
+  mint:  '<b>C · 薄荷几何</b> —— 冷调浅底 + 细网格 + 青绿强调，工具感、克制。<span class="cost">迁移成本：低（只换颜色 + 抽 --bw/--shadow）</span>'
+};
+
+function go(skin) {
+  document.documentElement.setAttribute('data-skin', skin);
+  document.getElementById('caption').innerHTML = CAPS[skin];
+  document.querySelectorAll('.sbtn').forEach(function (b) {
+    b.classList.toggle('on', b.getAttribute('data-go') === skin);
+  });
+}
+
+document.querySelectorAll('.sbtn').forEach(function (b) {
+  b.addEventListener('click', function () { go(b.getAttribute('data-go')); });
+});
+
+go('pop');
+</script>
+</body>
+</html>

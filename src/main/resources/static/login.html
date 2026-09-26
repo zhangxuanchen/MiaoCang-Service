@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 · 喵藏</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+  <style>
+    /* 登录页自身输入法的 Enter 组合保护：组合中不提交 */
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="ico brand-icon"><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span><span class="mouth"></span></div>
+        <div>
+          <div class="login-title">喵藏</div>
+          <div class="login-sub">内容引力波 · 个人 Wiki —— 登录后进入你的专属书房</div>
+        </div>
+      </div>
+
+      <div class="login-tabs">
+        <button id="tabLogin" class="active" onclick="switchTab('login')">登 录</button>
+        <button id="tabRegister" onclick="switchTab('register')">注 册</button>
+      </div>
+
+      <div class="login-err" id="loginErr"></div>
+
+      <form id="loginForm" onsubmit="return submitForm(event)">
+        <div class="login-field">
+          <label>用户名（即你的专属工作区根目录名）</label>
+          <input id="username" type="text" autocomplete="username" placeholder="admin" required>
+        </div>
+        <div class="login-field">
+          <label>密码</label>
+          <input id="password" type="password" autocomplete="current-password" placeholder="至少 6 位" required>
+        </div>
+        <div class="login-field">
+          <label>动态验证码（点击图案换一张）</label>
+          <div class="captcha-row">
+            <canvas id="capCanvas" width="118" height="44" title="看不清？点击刷新" onclick="newCaptcha()"></canvas>
+            <input id="capInput" type="text" maxlength="4" placeholder="输入图中 4 位" autocomplete="off">
+          </div>
+        </div>
+        <button class="login-submit" id="submitBtn" type="submit">进入书房 🐾</button>
+      </form>
+
+      <div class="login-hint">首次使用？默认账号 admin / admin123 · 每个用户拥有独立的书库根目录与喵</div>
+    </div>
+  </div>
+
+  <style>
+    /* 动态验证码行：canvas 图案 + 输入框并排，波普描边风 */
+    .captcha-row { display: flex; gap: 10px; align-items: stretch; }
+    .captcha-row canvas { flex: none; border: 2px solid var(--ink); border-radius: 10px;
+      background: #FFFDF7; box-shadow: 3px 3px 0 var(--ink); cursor: pointer; }
+    .captcha-row input { flex: 1; min-width: 0; }
+  </style>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let mode = 'login';
+
+    function switchTab(m) {
+      mode = m;
+      $('tabLogin').classList.toggle('active', m === 'login');
+      $('tabRegister').classList.toggle('active', m === 'register');
+      $('password').autocomplete = m === 'login' ? 'current-password' : 'new-password';
+      hideErr();
+    }
+    function showErr(msg) { const e = $('loginErr'); e.textContent = msg; e.style.display = 'block'; }
+    function hideErr() { $('loginErr').style.display = 'none'; }
+
+    /* ================= 动态验证码：canvas 逐帧重绘，字符呼吸摆动 + 干扰线噪点 ================= */
+    let capCode = '';
+    function newCaptcha() {
+      const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'; /* 去 0O1lI 易混淆 */
+      capCode = Array.from({ length: 4 }, () => chars[Math.random() * chars.length | 0]).join('');
+      $('capInput').value = '';
+    }
+    function drawCaptcha(ts) {
+      const cv = $('capCanvas'), ctx = cv.getContext('2d');
+      const W = cv.width, H = cv.height, t = ts / 1000;
+      ctx.fillStyle = '#FFFDF7';
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < 26; i++) { /* 波普噪点 */
+        ctx.fillStyle = `rgba(15,110,86,${(.05 + Math.random() * .12).toFixed(3)})`;
+        ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2);
+      }
+      ctx.strokeStyle = 'rgba(15,110,86,.22)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) { /* 干扰曲线 */
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * W, Math.random() * H);
+        ctx.bezierCurveTo(W * .3, Math.random() * H, W * .7, Math.random() * H, Math.random() * W, Math.random() * H);
+        ctx.stroke();
+      }
+      [...capCode].forEach((ch, i) => { /* 字符上下呼吸 + 小幅旋转，逐帧跳动 */
+        const x = 20 + i * ((W - 34) / 4);
+        const dy = Math.sin(t * 2.2 + i * 1.7) * 3;
+        const rot = Math.sin(t * 1.6 + i * 2.3) * .16;
+        ctx.save();
+        ctx.translate(x, H / 2 + dy);
+        ctx.rotate(rot);
+        ctx.font = `800 ${20 + ((i * 7) % 6)}px 'Segoe UI', system-ui, sans-serif`;
+        ctx.fillStyle = i % 2 ? '#0F6E56' : '#1a1a1a';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(ch, 0, 0);
+        ctx.restore();
+      });
+      requestAnimationFrame(drawCaptcha);
+    }
+    newCaptcha();
+    requestAnimationFrame(drawCaptcha);
+
+    async function submitForm(ev) {
+      ev.preventDefault();
+      hideErr();
+      const username = $('username').value.trim();
+      const password = $('password').value;
+      if (!username || !password) { showErr('请输入用户名和密码'); return false; }
+      if (($('capInput').value || '').trim().toLowerCase() !== capCode.toLowerCase()) {
+        showErr('验证码不对，已为你换了一张');
+        newCaptcha();
+        $('capInput').focus();
+        return false;
+      }
+      const btn = $('submitBtn');
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = mode === 'login' ? '验证中…' : '注册中…';
+      try {
+        const res = await fetch('/api/auth/' + mode, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || ('请求失败 ' + res.status));
+        if (mode === 'register') {
+          switchTab('login');
+          showErr('✅ 注册成功，请登录');
+          $('password').value = '';
+        } else {
+          localStorage.setItem('mc.token', data.token);
+          location.href = '/index.html';
+          return false;
+        }
+      } catch (e) {
+        showErr(e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = old;
+      }
+      return false;
+    }
+
+    /* 已带有效 token 的访客直接进书房（静默校验，失败留在登录页） */
+    (async function autoEnter() {
+      const t = localStorage.getItem('mc.token');
+      if (!t) return;
+      try {
+        const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + t } });
+        if (res.ok) location.href = '/index.html';
+        else localStorage.removeItem('mc.token');
+      } catch (e) { /* 服务未就绪，留在登录页 */ }
+    })();
+  </script>
+</body>
+</html>
